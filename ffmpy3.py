@@ -116,8 +116,8 @@ class FFmpeg(object):
             self.process = subprocess.Popen(
                 self._cmd,
                 stdin=subprocess.PIPE,
-                stdout=stdout,
-                stderr=stderr
+                stdout=subprocess.PIPE if stdout is None else stdout,
+                stderr=subprocess.PIPE if stderr is None else stderr
             )
         except OSError as e:
             if e.errno == errno.ENOENT:
@@ -136,7 +136,7 @@ class FFmpeg(object):
         """Asynchronously execute FFmpeg command line.
 
         ``input_data`` can contain input for FFmpeg in case `pipe <https://ffmpeg.org/ffmpeg-protocols.html#pipe>`_
-        
+
         ``stdout`` and ``stderr`` specify where to redirect the ``stdout`` and ``stderr`` of the
         process. By default no redirection is done, which means all output goes to running shell
         (this mode should normally only be used for debugging purposes).
@@ -222,7 +222,7 @@ class FFprobe(FFmpeg):
     Compiles FFprobe command line from passed arguments (executable path, options, inputs).
     FFprobe executable by default is taken from ``PATH`` but can be overridden with an
     absolute path.
-    
+
     Parameters
     -----------
     executable : str
@@ -261,11 +261,16 @@ class FFRuntimeError(Exception):
         The contents of stderr (only if executed synchronously).
     """
 
-    def __init__(self, cmd, exit_code, stdout=b'', stderr=b''):
+    def __init__(self, cmd, exit_code, stdout=None, stderr=None):
         self.cmd = cmd
         self.exit_code = exit_code
         self.stdout = stdout
         self.stderr = stderr
+
+        if stdout is None:
+            stdout = b''
+        if stderr is None:
+            stderr = b''
 
         message = "`{0}` exited with status {1}\n\nSTDOUT:\n{2}\n\nSTDERR:\n{3}".format(
             self.cmd,
