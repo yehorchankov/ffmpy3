@@ -3,7 +3,7 @@ import shlex
 import asyncio
 import subprocess
 
-__version__ = '0.2.3'
+__version__ = '0.2.4a'
 __license__ = 'MIT'
 
 """
